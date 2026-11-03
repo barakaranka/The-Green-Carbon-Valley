@@ -1,0 +1,6 @@
+{
+  "name": "Green Carbon Valley",
+  "description": "Empowering farmers to produce biochar locally, improve soil health, and capture carbon.",
+  "requestFramePermissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
