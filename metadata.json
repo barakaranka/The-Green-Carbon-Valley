@@ -1,6 +1,6 @@
 {
   "name": "Green Carbon Valley",
-  "description": "Empowering farmers to produce biochar locally, improve soil health, and capture carbon.",
+  "description": "Biochar from crop leftovers and water hyacinth, made by and for Kenyan smallholder farmers.",
   "requestFramePermissions": [],
   "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -7,25 +7,27 @@ service cloud.firestore {
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-
-    // Users
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isOwner(userId);
+    // A batch must have sensible weights and public-display consent.
+    function validBatch(d) {
+      return d.userId == request.auth.uid
+        && d.biomassKg is number && d.biomassKg > 0 && d.biomassKg <= 100000
+        && d.biocharKg is number && d.biocharKg >= 0 && d.biocharKg <= d.biomassKg
+        && d.consentPublic == true
+        && d.farmerName is string && d.farmerName.size() <= 80
+        && d.location is string && d.location.size() <= 80;
     }
 
-    // Batches: transparent MRV records for agricultural and carbon monitoring
+    // Users: own profile only
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Batches: public log, written by signed-in group leaders
     match /batches/{batchId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
-    }
-
-    // Calculation scenarios
-    match /scenarios/{scenarioId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && validBatch(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && validBatch(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
     // Connectivity test collection

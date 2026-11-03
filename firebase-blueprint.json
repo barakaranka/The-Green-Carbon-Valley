@@ -5,63 +5,112 @@
       "description": "User profile for Green Carbon Valley farmers, agronomists, and administrators",
       "type": "object",
       "properties": {
-        "uid": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "displayName": { "type": "string" },
-        "role": { "type": "string", "enum": ["farmer", "agronomist", "partner", "admin"] },
-        "region": { "type": "string" },
-        "createdAt": { "type": "string" }
+        "uid": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "farmer",
+            "agronomist",
+            "partner",
+            "admin"
+          ]
+        },
+        "region": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        }
       },
-      "required": ["uid", "email"]
+      "required": [
+        "uid",
+        "email"
+      ]
     },
     "BiocharBatch": {
       "title": "BiocharBatch",
       "description": "Logged biochar production batch with pyrolytic parameters and verified carbon sequestration metrics",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "farmerName": { "type": "string" },
-        "feedstock": { "type": "string" },
-        "biomassKg": { "type": "number" },
-        "biocharKg": { "type": "number" },
-        "co2eKg": { "type": "number" },
-        "retortMethod": { "type": "string" },
-        "location": { "type": "string" },
-        "date": { "type": "string" },
-        "notes": { "type": "string" }
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "farmerName": {
+          "type": "string",
+          "description": "Group or first name, shown publicly only with consent"
+        },
+        "feedstock": {
+          "type": "string",
+          "description": "Feedstock id from src/content.ts: crop, wood, nutshell, rice, hyacinth"
+        },
+        "biomassKg": {
+          "type": "number",
+          "description": "Dry leftovers in, kg"
+        },
+        "biocharKg": {
+          "type": "number",
+          "description": "Biochar out, kg, weighed"
+        },
+        "co2eKg": {
+          "type": "number",
+          "description": "Estimated CO2 kept in soil, kg, from content.ts factors"
+        },
+        "retortMethod": {
+          "type": "string",
+          "description": "Kiln used"
+        },
+        "location": {
+          "type": "string",
+          "description": "Village or ward"
+        },
+        "date": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "consentPublic": {
+          "type": "boolean",
+          "description": "Must be true; agreed to show name and place publicly"
+        },
+        "createdAt": {
+          "type": "string"
+        }
       },
-      "required": ["userId", "feedstock", "biomassKg", "biocharKg", "co2eKg"]
-    },
-    "CarbonScenario": {
-      "title": "CarbonScenario",
-      "description": "Saved sequestration forecast scenario by smallholder farmers or agronomists",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "title": { "type": "string" },
-        "monthlyFeedstockKg": { "type": "number" },
-        "annualBiocharKg": { "type": "number" },
-        "annualCo2eKg": { "type": "number" },
-        "feedstockType": { "type": "string" },
-        "createdAt": { "type": "string" }
-      },
-      "required": ["userId", "title", "monthlyFeedstockKg"]
+      "required": [
+        "userId",
+        "feedstock",
+        "biomassKg",
+        "biocharKg",
+        "co2eKg",
+        "consentPublic"
+      ]
     }
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": { "$ref": "#/entities/UserProfile" },
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
       "description": "Stores user profiles with personal role and location"
     },
     "/batches/{batchId}": {
-      "schema": { "$ref": "#/entities/BiocharBatch" },
+      "schema": {
+        "$ref": "#/entities/BiocharBatch"
+      },
       "description": "Collection of verified community and skid-retort biochar production runs"
-    },
-    "/scenarios/{scenarioId}": {
-      "schema": { "$ref": "#/entities/CarbonScenario" },
-      "description": "Saved calculation forecasts for farm-level carbon credit planning"
     }
   }
 }
