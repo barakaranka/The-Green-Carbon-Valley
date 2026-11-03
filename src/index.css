@@ -1,27 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+/*
+  Green Carbon Valley palette
+  Each colour stands for part of the project:
+  char = the biochar itself, leaf = the crop, soil = Western Kenya's red soils,
+  ember = the kiln fire (buttons only), lake = Lake Victoria and the hyacinth.
+  Contrast notes: sprout and husk are for dark backgrounds only.
+*/
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-brand-blue: #00AEEF;
-  --color-brand-dark: #000099;
-}
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
 
-@layer utilities {
-  .hero-gradient {
-    background: linear-gradient(135deg, #f8fafc 0%, #e1edd9 100%);
-  }
-  
-  .glass-card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
-  }
+  --color-char: #1B1A17;
+  --color-charcoal: #33312C;
+  --color-ash: #F5F1E8;
+  --color-ash-deep: #ECE6D9;
+  --color-muted: #5E5A51;       /* body text on light backgrounds (6.1:1) */
+  --color-muted-dark: #B8B2A5;  /* body text on dark backgrounds (8.3:1) */
+  --color-rule: #D9D2C3;
+
+  --color-leaf: #2E6B3A;
+  --color-leaf-dark: #24552E;
+  --color-sprout: #8DB84A;
+  --color-soil: #A9512E;
+  --color-lake: #2D6A86;
+  --color-ember: #E4772B;
+  --color-ember-light: #F08A3E;
+  --color-husk: #D8C18A;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
+  body {
+    background: var(--color-ash);
+    color: var(--color-char);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-ember);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

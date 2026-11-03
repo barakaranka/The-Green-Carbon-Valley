@@ -12,13 +12,11 @@ import {
   collection, 
   doc, 
   setDoc, 
-  getDocs, 
   query, 
   orderBy, 
   limit, 
   getDocFromServer,
   onSnapshot,
-  Timestamp 
 } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -94,34 +92,6 @@ export const signInWithGoogle = async (): Promise<User | null> => {
   }
 };
 
-// Demo / Guest Farmer helper for sandboxed iframe environments where external popups are blocked
-export const signInAsGuestFarmer = async (farmerName: string = 'Makongi Partner Farmer'): Promise<User | null> => {
-  try {
-    const { signInAnonymously } = await import('firebase/auth');
-    const cred = await signInAnonymously(auth);
-    if (cred.user) {
-      try {
-        const userRef = doc(db, 'users', cred.user.uid);
-        await setDoc(userRef, {
-          uid: cred.user.uid,
-          email: 'demo.farmer@greencarbonvalley.org',
-          displayName: farmerName,
-          photoURL: '',
-          lastActive: new Date().toISOString(),
-          role: 'farmer',
-          isDemo: true
-        }, { merge: true });
-      } catch (err) {
-        console.warn('Guest profile record skipped:', err);
-      }
-    }
-    return cred.user;
-  } catch (err: any) {
-    console.info('Anonymous guest sign-in handled locally:', err?.message);
-    return null;
-  }
-};
-
 export const logOut = async () => {
   try {
     await signOut(auth);
@@ -133,48 +103,52 @@ export const logOut = async () => {
 export interface BiocharBatchRecord {
   id: string;
   userId: string;
+  /** Group name or first name, shown publicly with consent. */
   farmerName: string;
+  /** Feedstock id from content.ts (older records may hold free text). */
   feedstock: string;
+  /** Dry leftovers in, kg. */
   biomassKg: number;
+  /** Biochar out, kg, weighed. */
   biocharKg: number;
+  /** Estimated CO2 kept in the soil, kg (from content.ts factors). */
   co2eKg: number;
+  /** Kiln used. */
   retortMethod: string;
+  /** Village or ward. */
   location: string;
   date: string;
   notes?: string;
+  consentPublic?: boolean;
   createdAt?: string;
 }
 
-// Save a new Biochar Production Batch
-export const saveBiocharBatch = async (batch: Omit<BiocharBatchRecord, 'id'>) => {
+/** Saves a batch. Throws if it could not be saved, so the page can say so. */
+export const saveBiocharBatch = async (batch: Omit<BiocharBatchRecord, 'id' | 'createdAt'>) => {
   const batchId = 'batch_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
-  const docRef = doc(db, 'batches', batchId);
-  const data = {
-    ...batch,
-    id: batchId,
-    createdAt: new Date().toISOString()
-  };
-  try {
-    await setDoc(docRef, data);
-  } catch (err: any) {
-    console.warn('Firestore setDoc notice (batch saved locally):', err?.message);
-  }
+  const data: BiocharBatchRecord = { ...batch, id: batchId, createdAt: new Date().toISOString() };
+  await setDoc(doc(db, 'batches', batchId), data);
   return data;
 };
 
-// Subscribe to recent batches for live community dashboard
-export const subscribeToBatches = (callback: (batches: BiocharBatchRecord[]) => void) => {
-  const batchesRef = collection(db, 'batches');
-  const q = query(batchesRef, orderBy('createdAt', 'desc'), limit(25));
-  return onSnapshot(q, (snapshot) => {
-    const list: BiocharBatchRecord[] = [];
-    snapshot.forEach((doc) => {
-      list.push(doc.data() as BiocharBatchRecord);
-    });
-    callback(list);
-  }, (err) => {
-    console.error('Batches subscription error:', err);
-  });
+/** Live list of the most recent batches. onError is called if the log can't be read. */
+export const subscribeToBatches = (
+  callback: (batches: BiocharBatchRecord[], fromCache: boolean) => void,
+  onError?: (err: unknown) => void,
+) => {
+  const q = query(collection(db, 'batches'), orderBy('createdAt', 'desc'), limit(100));
+  return onSnapshot(
+    q,
+    (snapshot) =>
+      callback(
+        snapshot.docs.map((d) => d.data() as BiocharBatchRecord),
+        snapshot.metadata.fromCache,
+      ),
+    (err) => {
+      console.error('Batches subscription error:', err);
+      onError?.(err);
+    },
+  );
 };
 
 export type { User };
